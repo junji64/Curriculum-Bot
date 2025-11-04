@@ -1,0 +1,5 @@
+{
+  "name": "Curriculum Collaboration Tool",
+  "description": "A web application for university department professors to collaboratively propose, vote on, and structure a curriculum by defining core areas and associated courses.",
+  "requestFramePermissions": []
+}
