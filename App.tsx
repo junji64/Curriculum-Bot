@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Professor, CoreArea, Course, AssociationMap, BooleanAssociationMap } from './types';
+import { Professor, CoreArea, Course, AssociationMap } from './types';
 import { PROFESSORS } from './constants';
-import { analyzeCurriculum } from './services/geminiService';
 import { ThumbsUpIcon, PlusCircleIcon, TrashIcon } from './components/icons';
 
 const App: React.FC = () => {
@@ -37,9 +36,6 @@ const App: React.FC = () => {
   
   const [newCoreArea, setNewCoreArea] = useState('');
   const [newCourse, setNewCourse] = useState({ name: '', year: 1, semester: 1 });
-  
-  const [geminiAnalysis, setGeminiAnalysis] = useState('');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(true);
   const [loginProfId, setLoginProfId] = useState<string>(PROFESSORS[0].id);
@@ -189,27 +185,6 @@ const App: React.FC = () => {
       
       return newAssociations;
     });
-  };
-
-  const handleAnalyze = async () => {
-    setIsAnalyzing(true);
-    setGeminiAnalysis('');
-
-    const booleanAssociations: BooleanAssociationMap = {};
-    for (const courseId in associations) {
-      if (Object.prototype.hasOwnProperty.call(associations, courseId)) {
-        booleanAssociations[courseId] = {};
-        for (const areaId in associations[courseId]) {
-          if (Object.prototype.hasOwnProperty.call(associations[courseId], areaId)) {
-            booleanAssociations[courseId][areaId] = (associations[courseId][areaId]?.length || 0) > 0;
-          }
-        }
-      }
-    }
-    
-    const result = await analyzeCurriculum(coreAreas, courses, booleanAssociations);
-    setGeminiAnalysis(result);
-    setIsAnalyzing(false);
   };
 
   const sortedCourses = useMemo(() => {
@@ -427,36 +402,6 @@ const App: React.FC = () => {
                 </table>
               ) : (
                   <p className="text-gray-500 text-center py-4">과목과 주요 진로를 먼저 제안해주세요.</p>
-              )}
-            </div>
-            
-            {/* Gemini Analysis */}
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h2 className="text-xl font-semibold mb-4 border-b pb-2 text-sky-800">5. AI 기반 커리큘럼 분석</h2>
-               <button
-                onClick={handleAnalyze}
-                disabled={isAnalyzing || courses.length === 0 || coreAreas.length === 0}
-                className="w-full bg-indigo-600 text-white px-4 py-3 rounded-md hover:bg-indigo-700 transition flex items-center justify-center space-x-2 disabled:bg-gray-400"
-              >
-                {isAnalyzing ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>분석 중...</span>
-                  </>
-                ) : (
-                  <span>Gemini로 커리큘럼 분석하기</span>
-                )}
-              </button>
-              {geminiAnalysis && (
-                <div className="mt-6 p-4 bg-gray-50 rounded-md border">
-                  <h3 className="text-lg font-semibold text-indigo-800 mb-2">분석 결과</h3>
-                  <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
-                    {geminiAnalysis}
-                  </div>
-                </div>
               )}
             </div>
           </div>
